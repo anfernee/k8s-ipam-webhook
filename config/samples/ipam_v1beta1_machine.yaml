@@ -1,0 +1,16 @@
+apiVersion: ipam.k8s.io/v1beta1
+kind: Machine
+metadata:
+  labels:
+    controller-tools.k8s.io: "1.0"
+  name: machine-sample
+spec:
+  interface:
+    network: dhcp-network
+    ipConfig:
+      ipv4: 1.2.3.4
+      gateway: 1.2.3.1
+      netmask: 255.255.255.0
+      dns:
+      - 8.8.8.8
+      ntp: 1.1.1.1
