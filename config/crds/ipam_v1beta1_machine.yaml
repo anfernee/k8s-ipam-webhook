@@ -27,6 +27,16 @@ spec:
         metadata:
           type: object
         spec:
+          properties:
+            interface:
+              properties:
+                ipConfig:
+                  type: object
+                network:
+                  type: string
+              type: object
+          required:
+          - interface
           type: object
         status:
           type: object
