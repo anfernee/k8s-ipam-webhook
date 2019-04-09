@@ -21,10 +21,10 @@ import (
 
 	"github.com/anfernee/k8s-ipam-webhook/pkg/apis"
 	ipamv1beta1 "github.com/anfernee/k8s-ipam-webhook/pkg/apis/ipam/v1beta1"
+	"github.com/anfernee/k8s-ipam-webhook/pkg/controller"
 	"github.com/anfernee/k8s-ipam-webhook/pkg/webhook/ipam"
 	admissionregistrationv1beta1 "k8s.io/api/admissionregistration/v1beta1"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
-	"sig.k8s.io/cluster-api/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
