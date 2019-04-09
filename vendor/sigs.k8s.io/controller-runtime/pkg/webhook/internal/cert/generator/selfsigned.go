@@ -20,6 +20,7 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"fmt"
+	"net"
 	"time"
 
 	"k8s.io/client-go/util/cert"
@@ -72,9 +73,20 @@ func (cp *SelfSignedCertGenerator) Generate(commonName string) (*Artifacts, erro
 	if err != nil {
 		return nil, fmt.Errorf("failed to create the private key: %v", err)
 	}
+
+	var altNames cert.AltNames
+	ip := net.ParseIP(commonName)
+	fmt.Printf("alt names: %v", ip)
+	if ip != nil {
+		altNames.IPs = []net.IP{ip}
+	} else {
+		altNames.DNSNames = []string{commonName}
+	}
+
 	signedCert, err := cert.NewSignedCert(
 		cert.Config{
 			CommonName: commonName,
+			AltNames:   altNames,
 			Usages:     []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
 		},
 		key, signingCert, signingKey,
