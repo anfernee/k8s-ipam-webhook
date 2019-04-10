@@ -15,7 +15,6 @@ package ipam
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 
 	ipamv1beta1 "github.com/anfernee/k8s-ipam-webhook/pkg/apis/ipam/v1beta1"
@@ -46,7 +45,6 @@ func (a *IPAMAllocator) Handle(ctx context.Context, req types.Request) types.Res
 	log := logf.Log.WithName("entrypoint")
 
 	log.Info("receive webhook request")
-	fmt.Println("receive webhook request")
 
 	machine := &ipamv1beta1.Machine{}
 

@@ -4,12 +4,12 @@ metadata:
   creationTimestamp: null
   labels:
     controller-tools.k8s.io: "1.0"
-  name: machines.ipam.k8s.io
+  name: ippools.ipam.k8s.io
 spec:
   group: ipam.k8s.io
   names:
-    kind: Machine
-    plural: machines
+    kind: IPPool
+    plural: ippools
   scope: Namespaced
   validation:
     openAPIV3Schema:
@@ -27,18 +27,6 @@ spec:
         metadata:
           type: object
         spec:
-          properties:
-            interface:
-              properties:
-                ipConfig:
-                  type: object
-                ipamPool:
-                  type: object
-                network:
-                  type: string
-              type: object
-          required:
-          - interface
           type: object
         status:
           type: object
