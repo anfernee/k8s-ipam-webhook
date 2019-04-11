@@ -1,0 +1,14 @@
+apiVersion: ipam.k8s.io/v1beta1
+kind: Machine
+metadata:
+  labels:
+    controller-tools.k8s.io: "1.0"
+  name: machine-ipam
+spec:
+  interface:
+    network: dhcp-network
+    ipamPool:
+      kind: IPPool
+      apiVersion: ipam.k8s.io/v1beta1
+      namespace: default
+      name: ippool-sample

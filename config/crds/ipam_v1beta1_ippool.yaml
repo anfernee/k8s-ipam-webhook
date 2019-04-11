@@ -27,8 +27,34 @@ spec:
         metadata:
           type: object
         spec:
+          properties:
+            dns:
+              items:
+                type: string
+              type: array
+            ntp:
+              type: string
+            reservedAddresses:
+              items:
+                properties:
+                  gateway:
+                    type: string
+                  netmask:
+                    type: string
+                type: object
+              type: array
           type: object
         status:
+          properties:
+            allocatedAddresses:
+              items:
+                properties:
+                  gateway:
+                    type: string
+                  netmask:
+                    type: string
+                type: object
+              type: array
           type: object
   version: v1beta1
 status:

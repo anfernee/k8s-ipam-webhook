@@ -2,11 +2,14 @@ package static
 
 import (
 	"context"
+	"fmt"
 
 	ipamv1beta1 "github.com/anfernee/k8s-ipam-webhook/pkg/apis/ipam/v1beta1"
 	"github.com/anfernee/k8s-ipam-webhook/pkg/provider"
+	"github.com/go-logr/logr"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 )
 
 func init() {
@@ -17,12 +20,15 @@ func init() {
 type staticProvider struct {
 	client.Client
 
+	log logr.Logger
 	// sync.Mutex // TODO(anfernee): synchronize allocate/release
 }
 
 // New creates an IPAMProvider instance
 func New() provider.IPAMProvider {
-	return &staticProvider{}
+	return &staticProvider{
+		log: logf.Log.WithName("ipam-provider-static"),
+	}
 }
 
 func (p *staticProvider) Allocate(ctx provider.IPAMContext) (ipamv1beta1.IPConfig, error) {
@@ -30,6 +36,7 @@ func (p *staticProvider) Allocate(ctx provider.IPAMContext) (ipamv1beta1.IPConfi
 	var ipPool ipamv1beta1.IPPool
 
 	if !p.Ready() {
+		p.log.Info("provider is not ready")
 		return result, provider.ErrProviderNotReady
 	}
 
@@ -41,6 +48,8 @@ func (p *staticProvider) Allocate(ctx provider.IPAMContext) (ipamv1beta1.IPConfi
 	if err := p.Get(context.Background(), nsname, &ipPool); err != nil {
 		return result, err
 	}
+
+	p.log.Info(fmt.Sprintf("spec: %+v", ipPool.Spec))
 
 	if len(ipPool.Spec.ReservedAddresses) == 0 {
 		return result, provider.ErrNoAddressAvailable

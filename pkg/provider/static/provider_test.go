@@ -56,9 +56,15 @@ func TestAllocateRelease(t *testing.T) {
 		}
 
 		ipPool := &ipamv1beta1.IPPool{}
-		if err := client.Get(context.Background(), types.NamespacedName{"ns", "n"}, ipPool); err != nil {
+		ipPool.Spec.ReservedAddresses = []ipamv1beta1.Address{}
+		ipPool.Status.AllocatedAddresses = []ipamv1beta1.Address{}
+		if err := client.Get(context.Background(), types.NamespacedName{
+			Namespace: "ns",
+			Name:      "n",
+		}, ipPool); err != nil {
 			t.Fatal(err)
 		}
+
 		if !reflect.DeepEqual(ipPool.Spec.ReservedAddresses, test.ipPoolEnd.Spec.ReservedAddresses) {
 			t.Errorf("got ippool.Spec.ReservedAddresses %+v; expect %+v", ipPool.Spec.ReservedAddresses, test.ipPoolEnd.Spec.ReservedAddresses)
 		}
@@ -106,7 +112,7 @@ func hasAddress(ip string) expectation {
 func hasError(expErr error) expectation {
 	return func(r result, err error) error {
 		if err != expErr {
-			fmt.Errorf("got error %v; expect %v", err, expErr)
+			return fmt.Errorf("got error %v; expect %v", err, expErr)
 		}
 		return nil
 	}

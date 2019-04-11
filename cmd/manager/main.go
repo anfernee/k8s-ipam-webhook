@@ -22,6 +22,8 @@ import (
 	"github.com/anfernee/k8s-ipam-webhook/pkg/apis"
 	ipamv1beta1 "github.com/anfernee/k8s-ipam-webhook/pkg/apis/ipam/v1beta1"
 	"github.com/anfernee/k8s-ipam-webhook/pkg/controller"
+	"github.com/anfernee/k8s-ipam-webhook/pkg/provider"
+	_ "github.com/anfernee/k8s-ipam-webhook/pkg/provider/static"
 	"github.com/anfernee/k8s-ipam-webhook/pkg/webhook/ipam"
 	admissionregistrationv1beta1 "k8s.io/api/admissionregistration/v1beta1"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
@@ -75,6 +77,14 @@ func main() {
 	if err := controller.AddToManager(mgr); err != nil {
 		log.Error(err, "unable to register controllers to the manager")
 		os.Exit(1)
+	}
+
+	// Setup IPAM provider
+	// TODO(anfernee): Fix this
+	for _, p := range provider.Providers {
+		if inject, ok := p.(provider.InjectClient); ok {
+			inject.SetClient(mgr.GetClient())
+		}
 	}
 
 	// register webhook

@@ -24,21 +24,21 @@ import (
 
 // IPPoolSpec defines the desired state of IPPool
 type IPPoolSpec struct {
-	ReservedAddresses []Address
-	DNS               []string
-	NTP               string
+	ReservedAddresses []Address `json:"reservedAddresses,omitempty"`
+	DNS               []string  `json:"dns,omitempty"`
+	NTP               string    `json:"ntp,omitempty"`
 }
 
 // IPPoolStatus defines the observed state of IPPool
 type IPPoolStatus struct {
-	AllocatedAddresses []Address
+	AllocatedAddresses []Address `json:"allocatedAddresses,omitempty"`
 }
 
 // Address is a IPv4 address
 type Address struct {
-	IPv4    string
-	Gateway string
-	Netmask string
+	IPv4    string `json:"ipv4,omitempty"`
+	Gateway string `json:"gateway,omitempty"`
+	Netmask string `json:"netmask,omitempty"`
 }
 
 // +genclient

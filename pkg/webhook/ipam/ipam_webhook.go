@@ -18,6 +18,8 @@ import (
 	"net/http"
 
 	ipamv1beta1 "github.com/anfernee/k8s-ipam-webhook/pkg/apis/ipam/v1beta1"
+	"github.com/anfernee/k8s-ipam-webhook/pkg/provider"
+	admissionv1beta1 "k8s.io/api/admission/v1beta1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/runtime/inject"
@@ -54,10 +56,43 @@ func (a *IPAMAllocator) Handle(ctx context.Context, req types.Request) types.Res
 	}
 	copy := machine.DeepCopy()
 
-	if copy.Annotations == nil {
-		copy.Annotations = map[string]string{}
+	// IP is already configured
+	if copy.Spec.Interface.IPConfig != nil {
+		return admission.PatchResponse(machine, copy)
 	}
-	copy.Annotations["example-mutating-admission-webhook"] = "foo"
+
+	// No IPAM pool specified
+	if machine.Spec.Interface.IPAMPool == nil {
+		// TODO: more effective way?
+		return admission.PatchResponse(machine, copy)
+	}
+
+	gvk := machine.Spec.Interface.IPAMPool.GroupVersionKind()
+	log.Info("ippool gvk: " + gvk.String())
+
+	if _, ok := provider.Providers[gvk]; !ok {
+		log.Info("gvk not found")
+		return admission.PatchResponse(machine, copy)
+	}
+
+	ipam := provider.Providers[gvk]
+
+	switch req.AdmissionRequest.Operation {
+	case admissionv1beta1.Create:
+		ipconfig, err := ipam.Allocate(provider.IPAMContext{Interface: &machine.Spec.Interface})
+		if err != nil {
+			return admission.ErrorResponse(http.StatusBadRequest, err)
+		}
+		copy.Spec.Interface.IPConfig = &ipconfig
+	case admissionv1beta1.Delete:
+		// TODO(anfernee): Use finalizer
+		if copy.Spec.Interface.IPConfig != nil {
+			err := ipam.Release(provider.IPAMContext{Interface: &machine.Spec.Interface}, *copy.Spec.Interface.IPConfig)
+			if err != nil {
+				return admission.ErrorResponse(http.StatusBadRequest, err)
+			}
+		}
+	}
 
 	return admission.PatchResponse(machine, copy)
 }
